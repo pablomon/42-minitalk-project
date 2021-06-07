@@ -1,13 +1,14 @@
-#define _XOPEN_SOURCE 700
-#include <unistd.h>
-#include <stdio.h>
-#include <signal.h>
+#include "minitalk.h"
 
-
-void handling_function(int signum)
+void handling_function(int signum, siginfo_t *info, ucontext_t *context)
 {
-	printf("Signal received %d\n", signum);
+	printf("Signal received %d from pid %d\n", signum, info->si_pid);
+	int ret = kill(info->si_pid, SIGUSR1);
+	if (ret == -1)
+	 	perror("error");
 }
+
+
 
 int main(int argc, char const *argv[])
 {

@@ -19,6 +19,7 @@ SRCS1 =	src/client.c \
 	src/tools.c
 OBJSRCS1 = $(SRCS1:.c=.o)
 
+$(NAME) : $(CLIENT), $(SERVER)
 $(CLIENT) : $(OBJSRCS1)
 	@echo "Libft compilation..."
 	@$(MAKE) -C ./libft
@@ -35,9 +36,9 @@ $(SERVER) : $(OBJSRCS2)
 	@$(CC) $(CFLAGS) $(OBJSRCS2) ./libft/libft.a -o $(SERVER)
 	@echo "Done !"
 
-all : $(CLIENT, SERVER)
+all : $(NAME)
 
-test : $(CLIENT)
+test : $(NAME)
 	./$(CLIENT)
 clean :
 	rm -rf $(OBJSRCS1)
