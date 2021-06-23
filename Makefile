@@ -16,7 +16,7 @@ CC = clang
 CFLAGS = ""
 CLIENT = client
 SRCS1 =	src/client.c \
-	src/tools.c
+	src/conversion.c
 OBJSRCS1 = $(SRCS1:.c=.o)
 
 $(NAME) : $(CLIENT), $(SERVER)
@@ -28,7 +28,8 @@ $(CLIENT) : $(OBJSRCS1)
 
 SERVER = server
 SRCS2 =	src/server.c \
-	src/tools.c
+	src/server_tools.c \
+	src/conversion.c
 OBJSRCS2 = $(SRCS2:.c=.o)
 
 $(SERVER) : $(OBJSRCS2)

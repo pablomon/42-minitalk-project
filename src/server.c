@@ -1,6 +1,6 @@
 #include "minitalk.h"
 
-int	g_client;
+// int	g_client;
 
 uint	*header_bit (uint value, int reset)
 {
@@ -13,7 +13,6 @@ uint	*header_bit (uint value, int reset)
 		i = 0;
 		return (0);
 	}
-	printf("%d", value);
 	header[i] = value;
 	i++;
 	return (&header[0]);
@@ -21,9 +20,9 @@ uint	*header_bit (uint value, int reset)
 
 void	enqueu_bit(t_list *lst, uint value)
 {
-	uint	*v;
-	t_list	*link;
-	uint	*ui;
+	uint		*v;
+	t_list		*link;
+	uint		*ui;
 
 	v = (uint *)(malloc(sizeof(uint)));
 	*v = value;
@@ -53,7 +52,10 @@ void	bit_received(uint value, int pid)
 	if (bit_num < (INT_BITS - 1))
 		header_bit(value, 0);
 	else if (bit_num == INT_BITS - 1)
+	{
 		msg_len = binary2int(header_bit(value, 0));
+		printf("Receiving %d characters long message...\n", msg_len);
+	}
 	else if (bit_num - INT_BITS < msg_len * 8 - 1)
 		enqueu_bit(lst, value);
 	else // msg finished
@@ -61,6 +63,7 @@ void	bit_received(uint value, int pid)
 		enqueu_bit(lst, value);
 		decode_msg(lst, msg_len);
 		null_list(lst);
+		lst = NULL;
 	}
 	bit_num++;
 }
@@ -69,15 +72,14 @@ void	handling_function(int signum, siginfo_t *info, void *context)
 {
 	int	pid;
 	int	ret;
-	// int pid = info->si_pid;
-	pid = g_client;
+	
+	// pid = g_client;
+	pid = info->si_pid;
 	if (signum == SIGUSR1)
 		bit_received(0, pid);
 	if (signum == SIGUSR2)
 		bit_received(1, pid);
-	usleep(100);
-	ret = kill(pid, SIGUSR1); // porque en linux no funciona
-	//int ret = kill(info->si_pid, SIGUSR1); // usar esta para pasarlo a mac
+	ret = kill(pid, SIGUSR1);
 	if (ret == -1)
 		perror("error");
 }
@@ -88,16 +90,12 @@ int	main(int argc, char const *argv[])
 	pid_t				pid;
 
 	sa.sa_handler = &handling_function;
-	//sa_1.sa_flags = SA_RESTART;
+	//sa.sa_flags = SA_RESTART;
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 	pid = getpid();
 	printf("pid %d\nListening...\n", pid);
-	printf("Client pid?");
-	scanf("%d", &g_client);
-	while (1 > 0)
-	{
-		sleep(1);
-	}
+	while (1)
+		pause();
 	return (0);
 }

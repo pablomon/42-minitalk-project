@@ -1,5 +1,16 @@
 #include "minitalk.h"
+#include <time.h>
 
+void print_time()
+{
+	time_t rawtime;
+  	struct tm * timeinfo;
+  	time ( &rawtime );
+  	timeinfo = localtime ( &rawtime );
+  	printf ( "time: %s", asctime (timeinfo) );
+}
+
+	
 int	send_bit(int set_pid, char **set_encoded)
 {
 	static char	**buf;
@@ -7,13 +18,14 @@ int	send_bit(int set_pid, char **set_encoded)
 	int			signum;
 	int			ret;
 
+	usleep(50);
 	if (set_encoded != NULL)
 		buf = set_encoded;
 	if (set_pid != 0)
 		pid = set_pid;
 	if (**buf)
 	{
-		printf("%c\t", **buf);
+		//printf("%c\t", **buf);
 		signum = SIGUSR1;
 		if (**buf == '1')
 			signum = SIGUSR2;
@@ -31,15 +43,15 @@ int	send_bit(int set_pid, char **set_encoded)
 
 void	handling_function(int signum, siginfo_t *info, void *context)
 {
-	int	end;
+	int		end;
 
 	if (signum == SIGUSR1)
 	{
-		printf("ack\n");
 		end = send_bit(0, NULL);
 		if (end == 1)
 		{
 			printf("\nMessage sent\n");
+			print_time();			
 			exit(0);
 		}
 	}
@@ -47,14 +59,23 @@ void	handling_function(int signum, siginfo_t *info, void *context)
 
 void	input_check(int argc, const char *argv[])
 {
+	const char	*ptr;
+
 	if (argc != 3)
 	{
 		printf("Usage: client pid message\n");
 		exit(EXIT_SUCCESS);
 	}
-	//if (argv[1] not a number)
-		// printf("pid entered is not a number\n");
-		// exit(EXIT_SUCCESS);
+	ptr = argv[1];
+	while (*ptr)
+	{
+		if (!ft_isdigit(*ptr))
+		{
+			printf("pid must be a number\n");
+			exit(EXIT_SUCCESS);
+		}
+		ptr++;
+	}
 }
 
 void	put_data(const char *msg, char *dest)
@@ -68,7 +89,7 @@ void	put_data(const char *msg, char *dest)
 		p += 8;
 		msg++;
 	}
-	printf("%s\n", dest);
+	//printf("%s\n", dest);
 }
 
 int	main(int argc, char const *argv[])
@@ -79,7 +100,6 @@ int	main(int argc, char const *argv[])
 	char				*encoded;
 	char				*p_malloc;
 
-	printf("client pid: %d\n", getpid());
 	input_check(argc, argv);
 	sa.sa_handler = &handling_function;
 	//sa.sa_flags = SA_RESTART;
@@ -90,16 +110,11 @@ int	main(int argc, char const *argv[])
 	errno = 0;
 	encoded = p_malloc;
 	int2binary(ft_strlen(argv[2]), encoded);
-	printf("%s\n", encoded);
 	put_data(argv[2], encoded + sizeof(uint) * 8);
-	printf("%s\n", encoded);
-
-	printf("Server pid?");
-	scanf("%d", &pid);
-
-	printf("Sending bits:\n");
+	printf("Sending %d characteres long message...\n", len);
+	print_time();
 	send_bit(pid, &encoded);
-	while (1 > 0)
+	while (1)
 		sleep(1);
 	free(p_malloc);
 	return (0);
