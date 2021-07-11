@@ -6,7 +6,7 @@
 #    By: pmontese <pmontese@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/28 19:15:11 by pmontese          #+#    #+#              #
-#    Updated: 2021/06/06 01:58:33 by pmontese         ###   ########.fr        #
+#    Updated: 2021/06/22 18:34:17 by pmontese         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ CC = clang
 CFLAGS = ""
 CLIENT = client
 SRCS1 =	src/client.c \
-	src/tools.c
+	src/conversion.c
 OBJSRCS1 = $(SRCS1:.c=.o)
 
 $(NAME) : $(CLIENT), $(SERVER)
@@ -28,7 +28,8 @@ $(CLIENT) : $(OBJSRCS1)
 
 SERVER = server
 SRCS2 =	src/server.c \
-	src/tools.c
+	src/conversion.c \
+	src/server_tools.c
 OBJSRCS2 = $(SRCS2:.c=.o)
 
 $(SERVER) : $(OBJSRCS2)

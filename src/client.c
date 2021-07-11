@@ -1,47 +1,35 @@
 #include "minitalk.h"
+#define SLEEP_TIME 300
 
-int	send_bit(int set_pid, char **set_encoded)
+void	send_bits(int pid, char **msg)
 {
-	static char	**buf;
-	static int	pid;
-	int			signum;
-	int			ret;
+	int		signum;
+	int		ret;
+	uint	byte[8];
+	int		i;
 
-	if (set_encoded != NULL)
-		buf = set_encoded;
-	if (set_pid != 0)
-		pid = set_pid;
-	if (**buf)
+	i = 0;
+	while (**msg)
 	{
-		printf("%c\t", **buf);
+		//printf("%c\t", **msg);
 		signum = SIGUSR1;
-		if (**buf == '1')
+		if (**msg == '1')
 			signum = SIGUSR2;
-		ret = kill(pid, signum);
-		if (ret == -1)
+		if (kill(pid, signum) == -1)
 		{
 			perror("error");
 			exit(EXIT_FAILURE);
 		}
-		*buf = *buf + 1;
-		return (0);
-	}
-	return (1);
-}
-
-void	handling_function(int signum, siginfo_t *info, void *context)
-{
-	int	end;
-
-	if (signum == SIGUSR1)
-	{
-		printf("ack\n");
-		end = send_bit(0, NULL);
-		if (end == 1)
-		{
-			printf("\nMessage sent\n");
-			exit(0);
-		}
+		// byte[i%8] = **msg - 48;
+		// printf("%d\n", byte[i%8]);
+		 if (i%8 == 0)
+		// {
+		 	ft_putstr(".");
+		// 	printf("%c", binary2char(byte));
+		// }
+		i++;
+		*msg = *msg + 1;
+		usleep(SLEEP_TIME);
 	}
 }
 
@@ -68,39 +56,30 @@ void	put_data(const char *msg, char *dest)
 		p += 8;
 		msg++;
 	}
-	printf("%s\n", dest);
+	//printf("%s\n", dest);
 }
 
 int	main(int argc, char const *argv[])
 {
-	struct sigaction	sa;
-	pid_t				pid;
-	int					len;
-	char				*encoded;
-	char				*p_malloc;
+	pid_t	pid;
+	int		len;
+	char	*encoded;
+	char	*p_malloc;
+	int		end;
 
-	printf("client pid: %d\n", getpid());
 	input_check(argc, argv);
-	sa.sa_handler = &handling_function;
-	//sa.sa_flags = SA_RESTART;
-	sigaction(SIGUSR1, &sa, NULL);
 	pid = ft_atoi(argv[1]);
 	len = ft_strlen(argv[2]);
 	p_malloc = (char *)(malloc(sizeof(int) * (sizeof(uint) * 8 + 8 * len)));
 	errno = 0;
 	encoded = p_malloc;
 	int2binary(ft_strlen(argv[2]), encoded);
-	printf("%s\n", encoded);
+	//printf("%s\n", encoded);
 	put_data(argv[2], encoded + sizeof(uint) * 8);
-	printf("%s\n", encoded);
-
-	printf("Server pid?");
-	scanf("%d", &pid);
-
+	//printf("%s\n", encoded);
 	printf("Sending bits:\n");
-	send_bit(pid, &encoded);
-	while (1 > 0)
-		sleep(1);
+	send_bits(pid, &encoded);
+	printf("\nMessage sent\n");
 	free(p_malloc);
 	return (0);
 }

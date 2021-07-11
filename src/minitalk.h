@@ -1,5 +1,6 @@
 #define _XOPEN_SOURCE 700
 #define INT_BITS sizeof(unsigned int) * 8
+#define _DEFAULT_SOURCE
 
 #include "../libft/libft.h"
 #include <errno.h>

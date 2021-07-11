@@ -36,6 +36,8 @@ void	decode_msg(t_list *lst, int len)
 		i++;
 	}
 	msg[i] = 0;
-	printf("Decoded message: %s\n", msg);
+	ft_putstr("Decoded message: ");
+	ft_putstr(msg);
+	ft_putstr("\n");
 	free (msg);
 }

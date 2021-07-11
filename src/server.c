@@ -1,20 +1,19 @@
 #include "minitalk.h"
 
-int	g_client;
-
-uint	*header_bit (uint value, int reset)
+uint	*do_header_bit (uint value)
 {
-	static uint	header[64];
+	static uint	header[INT_BITS];
 	static int	i;
 
-	if (reset == 1)
+	if (i == 0)
 	{
 		ft_memset(header, 0, sizeof(header));
-		i = 0;
-		return (0);
 	}
-	printf("%d", value);
 	header[i] = value;
+	if (i == INT_BITS - 1)
+	{
+		i = -1;
+	}
 	i++;
 	return (&header[0]);
 }
@@ -37,49 +36,58 @@ void	enqueu_bit(t_list *lst, uint value)
 	}
 }
 
-void	bit_received(uint value, int pid)
+int	do_msg_bit(uint value, uint msg_len)
 {
-	static int		bit_num;
-	static int		msg_len;
+	static int		i;
 	static t_list	*lst;
 
 	if (lst == NULL) // reset
 	{
 		lst = ft_lstnew(NULL);
-		bit_num = 0;
-		header_bit(0, 1);
+		i = 0;
 	}
-	//first 64bits are for the length of the message
-	if (bit_num < (INT_BITS - 1))
-		header_bit(value, 0);
-	else if (bit_num == INT_BITS - 1)
-		msg_len = binary2int(header_bit(value, 0));
-	else if (bit_num - INT_BITS < msg_len * 8 - 1)
-		enqueu_bit(lst, value);
-	else // msg finished
+	enqueu_bit(lst, value);
+	if (i == msg_len * 8 - 1)
 	{
-		enqueu_bit(lst, value);
 		decode_msg(lst, msg_len);
 		null_list(lst);
+		lst = NULL;
+		i = 0;
+		return (1);
 	}
-	bit_num++;
+	i++;
+	return (0);
 }
 
-void	handling_function(int signum, siginfo_t *info, void *context)
+// void	handling_function(int signum, siginfo_t *info, void *context)
+void handling_function(int signum)
 {
-	int	pid;
-	int	ret;
-	// int pid = info->si_pid;
-	pid = g_client;
+	static int	bits_received;
+	static uint	msg_len;
+	int			bit_val;
+
 	if (signum == SIGUSR1)
-		bit_received(0, pid);
-	if (signum == SIGUSR2)
-		bit_received(1, pid);
-	usleep(100);
-	ret = kill(pid, SIGUSR1); // porque en linux no funciona
-	//int ret = kill(info->si_pid, SIGUSR1); // usar esta para pasarlo a mac
-	if (ret == -1)
-		perror("error");
+		bit_val = 0;
+	else if (signum == SIGUSR2)
+		bit_val = 1;
+	else
+	{
+		printf("Signal received not USER1 or USER2\n");
+		exit(1);
+	}
+	if (bits_received < INT_BITS - 1)
+		do_header_bit(bit_val);
+	else if (bits_received == INT_BITS - 1)
+	{
+		msg_len = binary2int(do_header_bit(bit_val));
+	}
+	else
+		if (do_msg_bit(bit_val, msg_len))
+		{
+			ft_putstr("\n\n");
+			bits_received = -1;
+		}
+	bits_received++;
 }
 
 int	main(int argc, char const *argv[])
@@ -87,14 +95,14 @@ int	main(int argc, char const *argv[])
 	struct sigaction	sa;
 	pid_t				pid;
 
-	sa.sa_handler = &handling_function;
+	// sa.sa_handler = &handling_function;
 	//sa_1.sa_flags = SA_RESTART;
-	sigaction(SIGUSR1, &sa, NULL);
-	sigaction(SIGUSR2, &sa, NULL);
+	// sigaction(SIGUSR1, &sa, NULL);
+	// sigaction(SIGUSR2, &sa, NULL);
+	signal(SIGUSR1, &handling_function);
+	signal(SIGUSR2, &handling_function);
 	pid = getpid();
-	printf("pid %d\nListening...\n", pid);
-	printf("Client pid?");
-	scanf("%d", &g_client);
+	printf("pid %d\nListening:\n", pid);
 	while (1 > 0)
 	{
 		sleep(1);
