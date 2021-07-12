@@ -6,16 +6,29 @@ uint	*do_header_bit (uint value)
 	static int	i;
 
 	if (i == 0)
-	{
 		ft_memset(header, 0, sizeof(header));
-	}
 	header[i] = value;
 	if (i == INT_BITS - 1)
-	{
 		i = -1;
-	}
 	i++;
 	return (&header[0]);
+}
+
+void			get_bit_by_bit(int bit)
+{
+	printf("%d", bit);
+	static size_t size;
+	static char c;
+	c += ((bit & 1) << size);
+	size++;
+	if (size == 7)
+	{
+		ft_putchar_fd(c, 1);
+		if (!c)
+			ft_putchar_fd('\n', 1);
+		c = 0;
+		size = 0;
+	}
 }
 
 void	enqueu_bit(t_list *lst, uint value)
@@ -36,6 +49,21 @@ void	enqueu_bit(t_list *lst, uint value)
 	}
 }
 
+void print_bit(int val)
+{
+	static int i;
+	static uint bits[8];
+
+	bits[i] = val;
+	if (i == 7)
+	{
+		char c = binary2char(bits);
+		putchar(c);
+		i = -1;
+	}
+	i++;
+}
+
 int	do_msg_bit(uint value, uint msg_len)
 {
 	static int		i;
@@ -46,12 +74,13 @@ int	do_msg_bit(uint value, uint msg_len)
 		lst = ft_lstnew(NULL);
 		i = 0;
 	}
-	enqueu_bit(lst, value);
+	//enqueu_bit(lst, value);
+	print_bit(value);
 	if (i == msg_len * 8 - 1)
 	{
-		decode_msg(lst, msg_len);
-		null_list(lst);
-		lst = NULL;
+		//decode_msg(lst, msg_len);
+		//null_list(lst);
+		//lst = NULL;
 		i = 0;
 		return (1);
 	}
@@ -59,7 +88,6 @@ int	do_msg_bit(uint value, uint msg_len)
 	return (0);
 }
 
-// void	handling_function(int signum, siginfo_t *info, void *context)
 void handling_function(int signum)
 {
 	static int	bits_received;
@@ -90,22 +118,17 @@ void handling_function(int signum)
 	bits_received++;
 }
 
+
 int	main(int argc, char const *argv[])
 {
-	struct sigaction	sa;
 	pid_t				pid;
 
-	// sa.sa_handler = &handling_function;
-	//sa_1.sa_flags = SA_RESTART;
-	// sigaction(SIGUSR1, &sa, NULL);
-	// sigaction(SIGUSR2, &sa, NULL);
-	signal(SIGUSR1, &handling_function);
-	signal(SIGUSR2, &handling_function);
+	signal(SIGUSR1, handling_function);
+	signal(SIGUSR2, handling_function);
 	pid = getpid();
 	printf("pid %d\nListening:\n", pid);
 	while (1 > 0)
 	{
-		sleep(1);
+
 	}
-	return (0);
 }

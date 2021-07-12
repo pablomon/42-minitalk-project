@@ -1,37 +1,43 @@
 #include "minitalk.h"
-#define SLEEP_TIME 300
+#define SLEEP_TIME 100
 
-void	send_bits(int pid, char **msg)
+void	send_bits(int pid, char *str)
 {
 	int		signum;
 	int		ret;
 	uint	byte[8];
 	int		i;
+	char	*ptr;
 
 	i = 0;
-	while (**msg)
+	ptr = str;
+	while (*ptr)
 	{
-		//printf("%c\t", **msg);
 		signum = SIGUSR1;
-		if (**msg == '1')
+		if (*ptr == '1')
 			signum = SIGUSR2;
 		if (kill(pid, signum) == -1)
 		{
 			perror("error");
 			exit(EXIT_FAILURE);
 		}
-		// byte[i%8] = **msg - 48;
-		// printf("%d\n", byte[i%8]);
-		 if (i%8 == 0)
-		// {
-		 	ft_putstr(".");
-		// 	printf("%c", binary2char(byte));
-		// }
+		if (i%8 == 0)
+		ft_putstr(".");
 		i++;
-		*msg = *msg + 1;
+		ptr++;
 		usleep(SLEEP_TIME);
 	}
 }
+
+void	send_header(int pid, int len)
+{
+	char	header[INT_BITS + 1];
+
+	ft_bzero(header, INT_BITS + 1);
+	int2binary(len, header);
+	send_bits(pid, header);
+}
+
 
 void	input_check(int argc, const char *argv[])
 {
@@ -56,30 +62,24 @@ void	put_data(const char *msg, char *dest)
 		p += 8;
 		msg++;
 	}
-	//printf("%s\n", dest);
 }
 
 int	main(int argc, char const *argv[])
 {
 	pid_t	pid;
 	int		len;
-	char	*encoded;
-	char	*p_malloc;
+	char	*p_msg;
 	int		end;
 
 	input_check(argc, argv);
 	pid = ft_atoi(argv[1]);
 	len = ft_strlen(argv[2]);
-	p_malloc = (char *)(malloc(sizeof(int) * (sizeof(uint) * 8 + 8 * len)));
-	errno = 0;
-	encoded = p_malloc;
-	int2binary(ft_strlen(argv[2]), encoded);
-	//printf("%s\n", encoded);
-	put_data(argv[2], encoded + sizeof(uint) * 8);
-	//printf("%s\n", encoded);
+	send_header(pid, len);
+	p_msg = (char *)(malloc(sizeof(int) * 8 * len));
+	put_data(argv[2], p_msg);	
 	printf("Sending bits:\n");
-	send_bits(pid, &encoded);
+	send_bits(pid, p_msg);
 	printf("\nMessage sent\n");
-	free(p_malloc);
+	free(p_msg);
 	return (0);
 }
