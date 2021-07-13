@@ -1,29 +1,54 @@
 #include "minitalk.h"
 #define SLEEP_TIME 100
 
-void	send_bits(int pid, char *str)
+void print_char(int val)
+{
+	static	int i;
+	static	uint byte[8];
+	char c;
+
+	byte[i] = (uint)val;
+	if (i == 7)
+	{
+		i = 0;
+		c = 0;
+		while (i < 8)
+		{
+			if (byte[i] == 1)
+				c += 0x1 << i;
+			i++;
+		}
+		i = -1;
+
+		printf("%c", c);
+		//ft_putchar_fd(c, 1);
+	}
+	i++;
+}
+
+void	send_bits(int pid, char *str, int print)
 {
 	int		signum;
-	int		ret;
-	uint	byte[8];
-	int		i;
 	char	*ptr;
+	int		val;
 
-	i = 0;
 	ptr = str;
 	while (*ptr)
 	{
 		signum = SIGUSR1;
+		val = 0;
 		if (*ptr == '1')
+		{
 			signum = SIGUSR2;
+			val = 1;
+		}
 		if (kill(pid, signum) == -1)
 		{
 			perror("error");
 			exit(EXIT_FAILURE);
 		}
-		if (i%8 == 0)
-		ft_putstr(".");
-		i++;
+		if (print)
+			print_char(val);
 		ptr++;
 		usleep(SLEEP_TIME);
 	}
@@ -35,9 +60,8 @@ void	send_header(int pid, int len)
 
 	ft_bzero(header, INT_BITS + 1);
 	int2binary(len, header);
-	send_bits(pid, header);
+	send_bits(pid, header, 0);
 }
-
 
 void	input_check(int argc, const char *argv[])
 {
@@ -51,17 +75,21 @@ void	input_check(int argc, const char *argv[])
 		// exit(EXIT_SUCCESS);
 }
 
-void	put_data(const char *msg, char *dest)
+void	send_msg(pid_t pid, const char *input)
 {
-	char	*p;
+	char	*msg;
+	char	*ptr;
 
-	p = dest;
-	while (*msg)
+	msg = (char *)(malloc(sizeof(int) * 8 * ft_strlen(input)));
+	ptr = msg;
+	while (*input)
 	{
-		char2binary(*msg, p);
-		p += 8;
-		msg++;
+		char2binary(*input, ptr);
+		ptr += 8;
+		input++;
 	}
+	send_bits(pid, msg, 1);
+	free(msg);
 }
 
 int	main(int argc, char const *argv[])
@@ -75,11 +103,8 @@ int	main(int argc, char const *argv[])
 	pid = ft_atoi(argv[1]);
 	len = ft_strlen(argv[2]);
 	send_header(pid, len);
-	p_msg = (char *)(malloc(sizeof(int) * 8 * len));
-	put_data(argv[2], p_msg);	
 	printf("Sending bits:\n");
-	send_bits(pid, p_msg);
+	send_msg(pid, argv[2]);
 	printf("\nMessage sent\n");
-	free(p_msg);
 	return (0);
 }
