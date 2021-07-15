@@ -6,51 +6,32 @@
 #    By: pmontese <pmontese@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/28 19:15:11 by pmontese          #+#    #+#              #
-#    Updated: 2021/06/22 18:34:17 by pmontese         ###   ########.fr        #
+#    Updated: 2021/06/06 01:58:33 by pmontese         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-CC = clang
-#CFLAGS = -g -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls 	# used for memory leaks detection
-#CFLAGS = -Wall -Wextra -Werror # -g -fsanitize = address
-CFLAGS = ""
-CLIENT = client
-SRCS1 =	src/client.c \
-	src/conversion.c
-OBJSRCS1 = $(SRCS1:.c=.o)
+SERVER   = server
+CLIENT   = client
 
-$(NAME) : $(CLIENT), $(SERVER)
-$(CLIENT) : $(OBJSRCS1)
-	@echo "Libft compilation..."
-	@$(MAKE) -C ./libft
-	@echo "Client compilation..."
-	@$(CC) $(CFLAGS) $(OBJSRCS1) ./libft/libft.a -o $(CLIENT)
+CC	     = gcc $(FLAGS)
+#FLAGS =
+FLAGS    = -Wall -Werror -Wextra
+SERVER_SRC = src/server.c src/libft.c src/linked_lst.c src/server_tools.c src/conversion.c
+CLIENT_SRC = src/client.c src/libft.c src/conversion.c
 
-SERVER = server
-SRCS2 =	src/server.c \
-	src/conversion.c \
-	src/server_tools.c
-OBJSRCS2 = $(SRCS2:.c=.o)
+SERVER_SRC_OBJ	= $(SERVER_SRC:.c=.o)
+CLIENT_SRC_OBJ	= $(CLIENT_SRC:.c=.o)
 
-$(SERVER) : $(OBJSRCS2)
-	@echo "Server compilation..."
-	@$(CC) $(CFLAGS) $(OBJSRCS2) ./libft/libft.a -o $(SERVER)
-	@echo "Done !"
+all :	fclean $(SERVER_SRC_OBJ) $(CLIENT_SRC_OBJ)
+		@$(CC) $(SERVER_SRC) -I minitalk.h -o server
+		@$(CC) $(CLIENT_SRC) -I minitalk.h -o client
 
-all : $(NAME)
-
-test : $(NAME)
-	./$(CLIENT)
 clean :
-	rm -rf $(OBJSRCS1)
-	rm -rf $(OBJSRCS2)
-	$(MAKE) clean -C ./libft
+	@rm -rf ./src/*.o
 
-fclean : clean
-	$(MAKE) fclean -C ./libft
-	rm -rf $(CLIENT)
-	rm -rf $(SERVER)
+fclean: clean
+	@rm -rf $(SERVER) $(CLIENT)
 
-re : fclean all
+re: fclean all
 
-bonus : $(NAME)
+.PHONY : all clean fclean

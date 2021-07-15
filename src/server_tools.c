@@ -1,5 +1,28 @@
 #include "minitalk.h"
 
+void print_chars(uint bitval)
+{
+	static	int i;
+	static	uint byte[8];
+	char c;
+
+	byte[i] = bitval;
+	if (i == 7)
+	{
+		i = 0;
+		c = 0;
+		while (i < 8)
+		{
+			if (byte[i] == 1)
+				c += 0x1 << i;
+			i++;
+		}
+		i = -1;
+		write(1, &c, 1);
+	}
+	i++;
+}
+
 void	free_link(void *content)
 {
 	free(content);
@@ -7,12 +30,21 @@ void	free_link(void *content)
 
 void	null_list(t_list *lst)
 {
+	if (lst == NULL)
+		return;
 	ft_lstclear(&lst, free_link);
 	free(lst);
 	lst = NULL;
 }
 
-void	decode_msg(t_list *lst, int len)
+void	received(char *msg, pid_t pid)
+{
+	printf("\n\nPrinting message received:\n%s\n\n", msg);
+	kill(pid, SIGUSR2);
+	printf("pid %d\nlistening\n", getpid());
+}
+
+void	decode_msg(t_list *lst, int len, pid_t client_pid)
 {
 	int		i;
 	int		j;
@@ -36,8 +68,6 @@ void	decode_msg(t_list *lst, int len)
 		i++;
 	}
 	msg[i] = 0;
-	ft_putstr("Decoded message: ");
-	ft_putstr(msg);
-	ft_putstr("\n");
+	received(msg, client_pid);
 	free (msg);
 }

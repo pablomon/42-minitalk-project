@@ -19,7 +19,7 @@ void	char2binary(char c, char *dest)
 
 void	int2binary(uint n, char *str)
 {
-	int				i;
+	unsigned long	i;
 	unsigned char	d;
 
 	i = 0;
@@ -52,8 +52,8 @@ char	binary2char(uint *b)
 
 int	binary2int(uint *b)
 {
-	int		i;
-	uint	integer;
+	unsigned long	i;
+	uint			integer;
 
 	i = 0;
 	integer = 0;

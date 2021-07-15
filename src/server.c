@@ -1,42 +1,28 @@
 #include "minitalk.h"
 
-uint	*do_header_bit (uint value)
+uint	*header_bit (uint value, int reset)
 {
-	static uint	header[INT_BITS];
+	static uint	header[64];
 	static int	i;
 
-	if (i == 0)
+	if (reset == 1)
+	{
 		ft_memset(header, 0, sizeof(header));
+		i = 0;
+		return (0);
+	}
 	header[i] = value;
-	if (i == INT_BITS - 1)
-		i = -1;
 	i++;
 	return (&header[0]);
 }
 
-void			get_bit_by_bit(int bit)
-{
-	printf("%d", bit);
-	static size_t size;
-	static char c;
-	c += ((bit & 1) << size);
-	size++;
-	if (size == 7)
-	{
-		ft_putchar_fd(c, 1);
-		if (!c)
-			ft_putchar_fd('\n', 1);
-		c = 0;
-		size = 0;
-	}
-}
-
 void	enqueu_bit(t_list *lst, uint value)
 {
-	uint	*v;
-	t_list	*link;
-	uint	*ui;
+	uint		*v;
+	t_list		*link;
+	uint		*ui;
 
+	print_chars(value);
 	v = (uint *)(malloc(sizeof(uint)));
 	*v = value;
 	if (lst->content == NULL)
@@ -49,86 +35,58 @@ void	enqueu_bit(t_list *lst, uint value)
 	}
 }
 
-void print_bit(int val)
+void	bit_received(uint value, int pid)
 {
-	static int i;
-	static uint bits[8];
+	static unsigned long	bit_num;
+	static unsigned long	msg_len;
+	static t_list			*lst;
 
-	bits[i] = val;
-	if (i == 7)
+	if (bit_num == 0)
 	{
-		char c = binary2char(bits);
-		putchar(c);
-		i = -1;
-	}
-	i++;
-}
-
-int	do_msg_bit(uint value, uint msg_len)
-{
-	static int		i;
-	static t_list	*lst;
-
-	if (lst == NULL) // reset
-	{
+		null_list(lst);
 		lst = ft_lstnew(NULL);
-		i = 0;
+		header_bit(0, 1);
 	}
-	//enqueu_bit(lst, value);
-	print_bit(value);
-	if (i == msg_len * 8 - 1)
+	if (bit_num < (INT_BITS - 1))
+		header_bit(value, 0);
+	else if (bit_num == INT_BITS - 1)
 	{
-		//decode_msg(lst, msg_len);
-		//null_list(lst);
-		//lst = NULL;
-		i = 0;
-		return (1);
+		msg_len = binary2int(header_bit(value, 0));
+		printf("Receiving %lu characters long message...\n", msg_len);
 	}
-	i++;
-	return (0);
+	else
+		enqueu_bit(lst, value);
+	if (bit_num - INT_BITS == msg_len * 8 - 1)
+	{
+		decode_msg(lst, msg_len, pid);
+		bit_num = -1;
+	}
+	bit_num++;
 }
 
-void handling_function(int signum)
+void	handling_function(int signum, siginfo_t *info, void *context)
 {
-	static int	bits_received;
-	static uint	msg_len;
-	int			bit_val;
+	int	ret;
 
+	(void)context;
 	if (signum == SIGUSR1)
-		bit_val = 0;
-	else if (signum == SIGUSR2)
-		bit_val = 1;
-	else
-	{
-		printf("Signal received not USER1 or USER2\n");
-		exit(1);
-	}
-	if (bits_received < INT_BITS - 1)
-		do_header_bit(bit_val);
-	else if (bits_received == INT_BITS - 1)
-	{
-		msg_len = binary2int(do_header_bit(bit_val));
-	}
-	else
-		if (do_msg_bit(bit_val, msg_len))
-		{
-			ft_putstr("\n\n");
-			bits_received = -1;
-		}
-	bits_received++;
+		bit_received(0, info->si_pid);
+	if (signum == SIGUSR2)
+		bit_received(1, info->si_pid);
+	ret = kill(info->si_pid, SIGUSR1);
+	if (ret == -1)
+		perror("error");
 }
 
-
-int	main(int argc, char const *argv[])
+int	main()
 {
-	pid_t				pid;
+	struct sigaction act;
 
-	signal(SIGUSR1, handling_function);
-	signal(SIGUSR2, handling_function);
-	pid = getpid();
-	printf("pid %d\nListening:\n", pid);
-	while (1 > 0)
-	{
-
-	}
+	act.sa_sigaction = handling_function;
+	act.sa_flags = SA_SIGINFO;
+	sigaction(SIGUSR1, &act, NULL);
+	sigaction(SIGUSR2, &act, NULL);
+	printf("pid %d\nlistening\n", getpid());
+	while (1)
+		pause();
 }
