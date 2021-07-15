@@ -70,4 +70,5 @@ void	decode_msg(t_list *lst, int len, pid_t client_pid)
 	msg[i] = 0;
 	received(msg, client_pid);
 	free (msg);
+	null_list(lst);
 }

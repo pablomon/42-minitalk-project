@@ -17,13 +17,13 @@ void	char2binary(char c, char *dest)
 	}
 }
 
-void	int2binary(uint n, char *str)
+void	int2binary(t_uint n, char *str)
 {
 	unsigned long	i;
 	unsigned char	d;
 
 	i = 0;
-	while (i < sizeof(uint) * 8)
+	while (i < sizeof(t_uint) * 8)
 	{
 		d = 0x1 & n >> i;
 		if (d == 0)
@@ -34,7 +34,7 @@ void	int2binary(uint n, char *str)
 	}
 }
 
-char	binary2char(uint *b)
+char	binary2char(t_uint *b)
 {
 	int				i;
 	unsigned char	c;
@@ -50,14 +50,14 @@ char	binary2char(uint *b)
 	return (c);
 }
 
-int	binary2int(uint *b)
+int	binary2int(t_uint *b)
 {
 	unsigned long	i;
-	uint			integer;
+	t_uint			integer;
 
 	i = 0;
 	integer = 0;
-	while (i < sizeof(uint) * 8)
+	while (i < sizeof(t_uint) * 8)
 	{
 		if (b[i] == 1)
 			integer += 0x1 << i;

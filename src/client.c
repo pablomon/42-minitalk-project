@@ -75,10 +75,10 @@ int	main(int argc, char const *argv[])
 	signal(SIGUSR2, msg_received);
 	pid = ft_atoi(argv[1]);
 	len = ft_strlen(argv[2]);
-	p_malloc = (char *)(malloc(sizeof(int) * (sizeof(uint) * 8 + 8 * len)));
+	p_malloc = (char *)(malloc(sizeof(int) * (sizeof(t_uint) * 8 + 8 * len)));
 	encoded = p_malloc;
 	int2binary(ft_strlen(argv[2]), encoded);
-	put_data(argv[2], encoded + sizeof(uint) * 8);
+	put_data(argv[2], encoded + sizeof(t_uint) * 8);
 	printf("Sending %d characteres long message...\n", len);
 	send_bit(pid, &encoded);
 	while (1)

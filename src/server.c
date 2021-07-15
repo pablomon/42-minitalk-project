@@ -1,9 +1,9 @@
 #include "minitalk.h"
 
-uint	*header_bit (uint value, int reset)
+t_uint	*header_bit (t_uint value, int reset)
 {
-	static uint	header[64];
-	static int	i;
+	static t_uint	header[64];
+	static int		i;
 
 	if (reset == 1)
 	{
@@ -16,14 +16,14 @@ uint	*header_bit (uint value, int reset)
 	return (&header[0]);
 }
 
-void	enqueu_bit(t_list *lst, uint value)
+void	enqueu_bit(t_list *lst, t_uint value)
 {
-	uint		*v;
+	t_uint		*v;
 	t_list		*link;
-	uint		*ui;
+	t_uint		*ui;
 
 	print_chars(value);
-	v = (uint *)(malloc(sizeof(uint)));
+	v = (t_uint *)(malloc(sizeof(t_uint)));
 	*v = value;
 	if (lst->content == NULL)
 		lst->content = v;
@@ -31,11 +31,11 @@ void	enqueu_bit(t_list *lst, uint value)
 	{
 		link = ft_lstnew(v);
 		ui = link->content;
-		ft_lstadd_back(&lst, ft_lstnew(v));
+		ft_lstadd_back(&lst, link);
 	}
 }
 
-void	bit_received(uint value, int pid)
+void	bit_received(t_uint value, int pid)
 {
 	static unsigned long	bit_num;
 	static unsigned long	msg_len;
@@ -43,20 +43,19 @@ void	bit_received(uint value, int pid)
 
 	if (bit_num == 0)
 	{
-		null_list(lst);
 		lst = ft_lstnew(NULL);
 		header_bit(0, 1);
 	}
-	if (bit_num < (INT_BITS - 1))
+	if (bit_num < (sizeof(unsigned int) * 8 - 1))
 		header_bit(value, 0);
-	else if (bit_num == INT_BITS - 1)
+	else if (bit_num == sizeof(unsigned int) * 8 - 1)
 	{
 		msg_len = binary2int(header_bit(value, 0));
 		printf("Receiving %lu characters long message...\n", msg_len);
 	}
 	else
 		enqueu_bit(lst, value);
-	if (bit_num - INT_BITS == msg_len * 8 - 1)
+	if (bit_num - sizeof(unsigned int) * 8 == msg_len * 8 - 1)
 	{
 		decode_msg(lst, msg_len, pid);
 		bit_num = -1;
