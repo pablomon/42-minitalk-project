@@ -29,7 +29,7 @@ int	send_bit(int set_pid, char **set_encoded)
 	return (1);
 }
 
-void	handling_function(int signum)
+void	ack_bit(int signum)
 {
 	int		end;
 
@@ -44,31 +44,10 @@ void	handling_function(int signum)
 	}
 }
 
-void	acknowledged(int signum)
+void	msg_received(int signum)
 {
 	(void)signum;
 	printf("Server ack message received!\n");
-}
-
-void	input_check(int argc, const char *argv[])
-{
-	const char	*ptr;
-
-	if (argc != 3)
-	{
-		printf("Usage: client pid message\n");
-		exit(EXIT_SUCCESS);
-	}
-	ptr = argv[1];
-	while (*ptr)
-	{
-		if (!ft_isdigit(*ptr))
-		{
-			printf("pid must be a positive number\n");
-			exit(EXIT_SUCCESS);
-		}
-		ptr++;
-	}
 }
 
 void	put_data(const char *msg, char *dest)
@@ -92,8 +71,8 @@ int	main(int argc, char const *argv[])
 	char				*p_malloc;
 
 	input_check(argc, argv);
-	signal(SIGUSR1, handling_function);
-	signal(SIGUSR2, acknowledged);
+	signal(SIGUSR1, ack_bit);
+	signal(SIGUSR2, msg_received);
 	pid = ft_atoi(argv[1]);
 	len = ft_strlen(argv[2]);
 	p_malloc = (char *)(malloc(sizeof(int) * (sizeof(uint) * 8 + 8 * len)));

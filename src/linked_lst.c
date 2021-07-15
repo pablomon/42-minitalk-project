@@ -9,7 +9,7 @@ void	ft_lstdelone(t_list *lst, void (*del)(void *))
 
 void	ft_lstclear(t_list **lst, void (*del)(void*))
 {
-	t_list *tmp;
+	t_list	*tmp;
 
 	if (lst)
 	{
@@ -26,7 +26,8 @@ t_list	*ft_lstnew(void const *content)
 {
 	t_list	*list;
 
-	if (!(list = (t_list*)malloc(sizeof(t_list))))
+	list = (t_list *)malloc(sizeof(t_list));
+	if (!list)
 		return (NULL);
 	list->content = NULL;
 	list->next = NULL;
@@ -59,8 +60,3 @@ void	ft_lstadd_back(t_list **alst, t_list *new)
 		}
 	}
 }
-
-
-
-
-

@@ -1,10 +1,10 @@
 #include "minitalk.h"
 
-void print_chars(uint bitval)
+void	print_chars(uint bitval)
 {
-	static	int i;
-	static	uint byte[8];
-	char c;
+	static int	i;
+	static uint	byte[8];
+	char		c;
 
 	byte[i] = bitval;
 	if (i == 7)
@@ -31,7 +31,7 @@ void	free_link(void *content)
 void	null_list(t_list *lst)
 {
 	if (lst == NULL)
-		return;
+		return ;
 	ft_lstclear(&lst, free_link);
 	free(lst);
 	lst = NULL;

@@ -6,7 +6,7 @@
 #    By: pmontese <pmontese@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/28 19:15:11 by pmontese          #+#    #+#              #
-#    Updated: 2021/06/06 01:58:33 by pmontese         ###   ########.fr        #
+#    Updated: 2021/07/15 12:05:52 by pmontese         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,10 +14,10 @@ SERVER   = server
 CLIENT   = client
 
 CC	     = gcc $(FLAGS)
-#FLAGS =
-FLAGS    = -Wall -Werror -Wextra
+FLAGS =
+# FLAGS    = -Wall -Werror -Wextra
 SERVER_SRC = src/server.c src/libft.c src/linked_lst.c src/server_tools.c src/conversion.c
-CLIENT_SRC = src/client.c src/libft.c src/conversion.c
+CLIENT_SRC = src/client.c src/libft.c src/conversion.c src/client_tools.c
 
 SERVER_SRC_OBJ	= $(SERVER_SRC:.c=.o)
 CLIENT_SRC_OBJ	= $(CLIENT_SRC:.c=.o)

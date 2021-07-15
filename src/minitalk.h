@@ -34,3 +34,5 @@ int		binary2int(uint *b);
 void	print_chars(uint bitval);
 void	null_list(t_list *lst);
 void	decode_msg(t_list *lst, int len, pid_t pid);
+
+void	input_check(int argc, const char *argv[]);

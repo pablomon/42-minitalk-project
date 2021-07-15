@@ -78,9 +78,9 @@ void	handling_function(int signum, siginfo_t *info, void *context)
 		perror("error");
 }
 
-int	main()
+int	main(void)
 {
-	struct sigaction act;
+	struct sigaction	act;
 
 	act.sa_sigaction = handling_function;
 	act.sa_flags = SA_SIGINFO;
