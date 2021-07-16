@@ -1,10 +1,10 @@
 #include "minitalk.h"
 
-void	print_chars(uint bitval)
+void	print_chars(t_uint bitval)
 {
-	static int	i;
-	static uint	byte[8];
-	char		c;
+	static int		i;
+	static t_uint	byte[8];
+	char			c;
 
 	byte[i] = bitval;
 	if (i == 7)
@@ -48,7 +48,7 @@ void	decode_msg(t_list *lst, int len, pid_t client_pid)
 {
 	int		i;
 	int		j;
-	uint	binary_char[8];
+	t_uint	binary_char[8];
 	char	*msg;
 	t_list	*ptrlst;
 
@@ -60,7 +60,7 @@ void	decode_msg(t_list *lst, int len, pid_t client_pid)
 		j = 0;
 		while (j < 8)
 		{
-			binary_char[j] = *((uint *)(ptrlst->content));
+			binary_char[j] = *((t_uint *)(ptrlst->content));
 			j++;
 			ptrlst = ptrlst->next;
 		}

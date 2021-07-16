@@ -7,7 +7,6 @@ int	send_bit(int set_pid, char **set_encoded)
 	int			signum;
 	int			ret;
 
-	usleep(50);
 	if (set_encoded != NULL)
 		buf = set_encoded;
 	if (set_pid != 0)

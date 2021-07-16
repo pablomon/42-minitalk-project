@@ -20,7 +20,6 @@ void	enqueu_bit(t_list *lst, t_uint value)
 {
 	t_uint		*v;
 	t_list		*link;
-	t_uint		*ui;
 
 	print_chars(value);
 	v = (t_uint *)(malloc(sizeof(t_uint)));
@@ -30,7 +29,6 @@ void	enqueu_bit(t_list *lst, t_uint value)
 	else
 	{
 		link = ft_lstnew(v);
-		ui = link->content;
 		ft_lstadd_back(&lst, link);
 	}
 }
